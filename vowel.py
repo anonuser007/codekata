@@ -6,4 +6,3 @@ if ch.isalpha():
    print(ch, "is a consonant.\n")
 else:
    print("Invalid!")
-  
