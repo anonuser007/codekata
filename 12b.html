@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Bustracker, Thingspeak, GPS and Google Map</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 100%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAMCLZt7U-dllkC1U4pD8wnNJtMJFm-XQc"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script>
+
+      var map;
+        var x;
+        function loadmaps(){
+            $.getJSON("https://api.thingspeak.com/channels/325598/fields/1/last.json?api_key=R6JZAXR4VUHEMQ9S", function(result){
+        	
+            var m = result;
+            x=Number(m.field1);
+                           //alert(x);
+
+        });
+            $.getJSON("https://api.thingspeak.com/channels/325598/fields/2/last.json?api_key=R6JZAXR4VUHEMQ9S", function(result){
+        	
+            var m = result;
+            y=Number(m.field2);
+                
+                
+        }).done(function() {
+            
+                initialize();
+    });
+            
+        }
+        window.setInterval(function(){
+        loadmaps();
+            }, 9000);
+      function initialize() {
+          //alert(y);
+        var mapOptions = {
+          zoom: 14,
+          center: {lat: x, lng: y}
+        };
+        map = new google.maps.Map(document.getElementById('map'),
+            mapOptions);
+
+        var marker = new google.maps.Marker({
+          position: {lat: x, lng: y},
+          map: map
+        });
+
+        var infowindow = new google.maps.InfoWindow({
+          content: '<p>Marker Location:' + marker.getPosition() + '</p>'
+        });
+
+        google.maps.event.addListener(marker, 'click', function() {
+          infowindow.open(map, marker);
+        });
+
+       var trafficLayer = new google.maps.TrafficLayer();
+       trafficLayer.setMap(map);      
+	setMarkers(map);
+}
+////////////////////////////////////////////////////////////////////////////////
+     var beaches = [
+      ['Vadapalani Bus Stand',13.052192, 80.2221, 4],
+        ['Trustpuram', 13.0551, 80.225, 5],
+      ['Bharathi Nagar', 13.0404, 80.2301, 3],
+      ['Pondy Bazar', 13.0399,  80.2369, 2],
+//        ['F.C.I Old', 13.0336, 80.2505, 1]
+ //     ['Luz',13.0368, 80.2676, 1]
+//        ['Santhome P.O',13.0319, 80.2788, 1]
+//        ['Fore Shore Estate',13.0102, 80.2157, 1]
+
+//      ['Bondi Beach',13.052192, 80.212051, 4],
+ //       ['Coogee Beach', -33.923036, 151.259052, 5],
+//        ['Cronulla Beach', -34.028249, 151.157507, 3],
+//        ['Manly Beach', -33.80010128657071, 151.28747820854187, 2],
+  //      ['Maroubra Beach', -33.950198, 151.259302, 1]
+  
+      ];
+
+      
+
+//////////////////////////////////////////////////////////////////////////////////
+function setMarkers(map) {
+        // Adds markers to the map.
+
+        // Marker sizes are expressed as a Size of X,Y where the origin of the image
+        // (0,0) is located in the top left of the image.
+
+        // Origins, anchor positions and coordinates of the marker increase in the X
+        // direction to the right and in the Y direction down.
+        var image = {
+          url: 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png',
+          // This marker is 20 pixels wide by 32 pixels high.
+          size: new google.maps.Size(20, 32),
+          // The origin for this image is (0, 0).
+          origin: new google.maps.Point(0, 0),
+          // The anchor for this image is the base of the flagpole at (0, 32).
+          anchor: new google.maps.Point(0, 32)
+        };
+        // Shapes define the clickable region of the icon. The type defines an HTML
+        // <area> element 'poly' which traces out a polygon as a series of X,Y points.
+        // The final coordinate closes the poly by connecting to the first coordinate.
+        var shape = {
+          coords: [1, 1, 1, 20, 18, 20, 18, 1],
+          type: 'poly'
+        };
+        for (var i = 0; i < beaches.length; i++) {
+          var beach = beaches[i];
+          var marker = new google.maps.Marker({
+            position: {lat: beach[1], lng: beach[2]},
+            map: map,
+            icon: image,
+            shape: shape,
+            title: beach[0],
+            zIndex: beach[3]
+          });
+        }
+      }
+////////////////////////////////////////////////////////////////////////////////////
+      google.maps.event.addDomListener(window, 'load', initialize);
+    </script>
+  </head>
+  <body>
+    <div id="map"></div>
+  </body>
+</html>
